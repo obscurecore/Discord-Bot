@@ -1,0 +1,17 @@
+# Project exclude paths
+/.gradle/
+/advice-cards/build/
+/advice-cards/out/
+/advice-cards/out/production/classes/
+/commons/build/
+/commons/out/
+/commons/out/production/classes/
+/fines-cards/build/
+/fines-cards/out/
+/fines-cards/out/production/classes/
+/hub/build/
+/hub/out/
+/hub/out/production/classes/
+/regular-cards/build/
+/regular-cards/out/
+/regular-cards/out/production/classes/

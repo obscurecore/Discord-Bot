@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+description = """"""
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+
+
+repositories {
+        
+     maven { url "https://repo.maven.apache.org/maven2" }
+}
