@@ -7,9 +7,9 @@ import java.util.List;
 
 public class Config {
 
-	public String token;
+	public String token="";
 	public int Delay;
-	public List<Channel> channels;
+	public  transient List<Channel> channels;
 
 	public static Config getDefault() {
 		final Config c = new Config();

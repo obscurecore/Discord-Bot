@@ -34,11 +34,11 @@ public class CEWBot {
 	public static IDiscordClient client;
 
 	public static void main(final String[] args) throws ConfigException {
-		loadConfigs();
-		client = createClient(config.token, true);
+		saveConfigs();
+		client = createClient("NzA5NzA5ODE2NDk4NDg3MzQ4.Xr8DFw.xBT6tdMiMXiWQmeQHv-uV1YvCO0", true);
 		final EventDispatcher dispatcher = client.getDispatcher();
 		dispatcher.registerListener(new EventListener());
-		LOGGER.info("Running EEWBot");
+		LOGGER.info("Running CEWBot");
 	}
 
 	public static IDiscordClient createClient(final String token, final boolean login) {
