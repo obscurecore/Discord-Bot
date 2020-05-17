@@ -29,7 +29,6 @@ public class EventListener {
                 BotUtils.reply(e, "what！");
             else {
                final Command command = EnumUtils.getEnum(Command.class, args[1]);
-                System.out.println(EnumUtils.getEnumList(Command.class));
                 if (command != null)
                 	command.onCommand(e, ArrayUtils.subarray(args, 2, args.length+1));
             }
@@ -42,9 +41,7 @@ public class EventListener {
         final Collection<Channel> channels = CEWBot.channels.get(e.getChannel().getGuild().getLongID());
         if (channels != null) {
             final long id = e.getChannel().getLongID();
-            for (final Iterator<Channel> it = channels.iterator(); it.hasNext(); )
-                if (it.next().getId() == id)
-                    it.remove();
+            channels.removeIf(channel -> channel.getId() == id);
             try {
                 CEWBot.saveConfigs();
             } catch (final ConfigException ex) {
@@ -98,13 +95,24 @@ public class EventListener {
                     BotUtils.reply(e, "ConfigException");
                     CEWBot.LOGGER.error("Save error", ex);
                 }
-                BotUtils.reply(e, "We've set up a channel.");
+                BotUtils.reply(e, "Have set up a channel.");
             }
         },
         unregister {
             @Override
             public void onCommand(final MessageReceivedEvent e, final String[] args) {
-
+                final Collection<Channel> channels = CEWBot.channels.get(e.getGuild().getLongID());
+                if (channels!=null) {
+                    final long id = e.getChannel().getLongID();
+                    channels.removeIf(channel -> channel.getId() == id);
+                    try {
+                        CEWBot.saveConfigs();
+                        BotUtils.reply(e, "Done");
+                    } catch (final ConfigException ex) {
+                        CEWBot.LOGGER.error("Error on channel delete", ex);
+                    }
+                } else
+                    BotUtils.reply(e, "This channel has no settings");
             }
         };
 

@@ -8,15 +8,18 @@ import java.util.List;
 public class Config  {
 
 	public String token="";
-	public int Delay;
+	public int RDelay;
+	public int timeFixDelay;
 	public  List<Channel> channels;
-
+	public String nptServer;
 
 	public static Config getDefault() {
 		final Config c = new Config();
 		c.token = "";
-		c.Delay = 1;
+		c.RDelay = 1;
+		c.timeFixDelay = 86400;
 		c.channels = Arrays.asList();
+		c.nptServer = "time.google.com";
 		return c;
 	}
 

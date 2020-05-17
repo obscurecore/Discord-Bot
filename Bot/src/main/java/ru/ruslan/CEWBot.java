@@ -21,6 +21,7 @@ import sx.blah.discord.api.events.EventDispatcher;
 
 
 public class CEWBot {
+    public static final NTPClient NTP_CLIENT = new NTPClient();
     public static final Logger LOGGER = LoggerFactory.getLogger(CEWBot.class);
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final File JARPATH = new File(".").getAbsoluteFile();
