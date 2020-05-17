@@ -1,8 +1,18 @@
 package ru.ruslan;
 
-public class Channel {
+import java.io.Serializable;
 
-	public long id;
+public class Channel  {
+	private final long id;
 	public boolean cewAlert;
 	public boolean cewPrediction;
+
+	public Channel(final long id) {
+		this.id = id;
+	}
+
+	public long getId() {
+		return this.id;
+	}
+
 }
