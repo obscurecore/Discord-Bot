@@ -1,9 +1,14 @@
 package ru.ruslan;
 
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.EnumUtils;
 
 import sx.blah.discord.api.events.EventSubscriber;
@@ -11,54 +16,98 @@ import sx.blah.discord.handle.impl.events.guild.channel.ChannelDeleteEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 public class EventListener {
+    /**
+     * Registers a listener
+     * All events sent to this listener will be done asynchronously using a default thread pool configured
+     */
+    @EventSubscriber
+    public void onMessageReceived(final MessageReceivedEvent e) {
+        final String msg = e.getMessage().getContent();
+        if (msg.startsWith("!cew")) {
+            final String[] args = msg.split(" ");
+            if (args.length <= 1)
+                BotUtils.reply(e, "what！");
+            else {
+               final Command command = EnumUtils.getEnum(Command.class, args[1]);
+                System.out.println(EnumUtils.getEnumList(Command.class));
+                if (command != null)
+                	command.onCommand(e, ArrayUtils.subarray(args, 2, args.length+1));
+            }
+        }
+    }
 
-	@EventSubscriber
-	public void onMessageReceived(final MessageReceivedEvent e) {
-		final String msg = e.getMessage().getContent();
-		if (msg.startsWith("!cew")) {
-			final String[] args = msg.split(" ");
-			if (args.length<=1)
-				BotUtils.reply(e, "what！");
-			else {
-				final Command command = EnumUtils.getEnum(Command.class, args[1]);
-				if (command!=null)
-					command.onCommand(e, ArrayUtils.subarray(args, 2, args.length+1));
-			}
-		}
-	}
+
+    @EventSubscriber
+    public void onChannelDelete(final ChannelDeleteEvent e) {
+        final Collection<Channel> channels = CEWBot.channels.get(e.getChannel().getGuild().getLongID());
+        if (channels != null) {
+            final long id = e.getChannel().getLongID();
+            for (final Iterator<Channel> it = channels.iterator(); it.hasNext(); )
+                if (it.next().getId() == id)
+                    it.remove();
+            try {
+                CEWBot.saveConfigs();
+            } catch (final ConfigException ex) {
+                CEWBot.LOGGER.error("Error on channel delete", ex);
+            }
+        }
+    }
 
 
+    public static enum Command {
+        register {
+            @Override
+            public void onCommand(final MessageReceivedEvent e, final String[] args) {
+                final long serverid = e.getChannel().getGuild().getLongID();
+                final long channelid = e.getChannel().getLongID();
+                Collection<Channel> channels = CEWBot.channels.get(serverid);
+                Channel channel = null;
+                if (channels != null) {
+                    for (final Iterator<Channel> it = channels.iterator(); it.hasNext(); ) {
+                        final Channel c = it.next();
+                        if (c.getId() == channelid)
+                            channel = c;
+                    }
+                } else
+                    channels = new ArrayList<>();
+                if (channel == null)
+                    channel = new Channel(channelid);
+                if (args.length <= 0)
+                    channel.cewAlert = true;
+                else if (args.length % 2 != 0)
+                    BotUtils.reply(e, "The argument is missing");
+                else {
+                    final Field[] fields = Channel.class.getFields();
+                    for (int i = 0; i < args.length; i += 2) {
+                        for (final Field line : fields) {
+                            if (line.getName().equals(args[i]))
+                                try {
+                                    line.setBoolean(channel, BooleanUtils.toBoolean(args[i + 1]));
+                                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                                    BotUtils.reply(e, "I've got an error.");
+                                    CEWBot.LOGGER.error("Reflection error", ex);
+                                }
+                        }
+                    }
+                }
+                channels.add(channel);
+                CEWBot.channels.put(serverid, channels);
+                try {
+                    CEWBot.saveConfigs();
+                } catch (final ConfigException ex) {
+                    BotUtils.reply(e, "ConfigException");
+                    CEWBot.LOGGER.error("Save error", ex);
+                }
+                BotUtils.reply(e, "We've set up a channel.");
+            }
+        },
+        unregister {
+            @Override
+            public void onCommand(final MessageReceivedEvent e, final String[] args) {
 
-	@EventSubscriber
-	public void onChannelDelete(final ChannelDeleteEvent e) {
-		final Collection<Channel> channels = CEWBot.channels.get(e.getChannel().getGuild().getLongID());
-		if (channels!=null) {
-			final long id = e.getChannel().getLongID();
-			for (final Iterator<Channel> it = channels.iterator(); it.hasNext();)
-				if (it.next().id==id)
-					it.remove();
-			try {
-				CEWBot.saveConfigs();
-			} catch (final ConfigException ex) {
-				CEWBot.LOGGER.error("Error on channel delete", ex);
-			}
-		}
-	}
+            }
+        };
 
-	public static enum Command {
-		register {
-			@Override
-			public void onCommand(final MessageReceivedEvent e, final String[] args) {
-
-			}
-		},
-		unregister {
-			@Override
-			public void onCommand(final MessageReceivedEvent e, final String[] args) {
-
-			}
-		};
-
-		public abstract void onCommand(MessageReceivedEvent e, String[] args);
-	}
+        public abstract void onCommand(MessageReceivedEvent e, String[] args);
+    }
 }

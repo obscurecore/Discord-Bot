@@ -18,7 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.obj.User;
+
 
 public class CEWBot {
     public static final Logger LOGGER = LoggerFactory.getLogger(CEWBot.class);
@@ -31,7 +31,7 @@ public class CEWBot {
     public static void main(final String[] args) throws ConfigException {
 
         loadConfigs();
-        client = createClient("NzA5NzA5ODE2NDk4NDg3MzQ4.Xr_bcg.tvnKrAiQilJDwt8CKTE--ZVBxn0", true);
+        client = createClient(config.token, true);
 
         /**
          * The EventDispatcher stores a registry of listeners which are used on every event being dispatched.
@@ -62,6 +62,7 @@ public class CEWBot {
 
     public static void loadConfigs() throws ConfigException {
         Writer writer = null;
+        Reader reader = null;
 
         try {
             final File cfgFile = new File(JARPATH, "config.json");
@@ -73,15 +74,18 @@ public class CEWBot {
                 writer.close();
             }
             // Deserialize
-            config = GSON.fromJson(new BufferedReader(new FileReader(cfgFile)), Config.class);
-
+            reader=Files.newBufferedReader(cfgFile.toPath());
+            config = GSON.fromJson(reader, Config.class);
+            reader.close();
         } catch (JsonSyntaxException | JsonIOException | IOException e) {
             throw new ConfigException("Config load  error", e);
         }
 
         try {
             final File channelFile = new File(JARPATH, "channels.json");
-            final Type type = new TypeToken<Map<Long, Collection<Long>>>() {
+            // TypeToken to determine the correct type to be deserialized,
+            // Can't deserialize the data without additional information. Collection must be of a specific type, generic type
+            final Type type = new TypeToken<Map<Long, Collection<Channel>>>() {
             }.getType();
             if (!channelFile.exists()) {
                 writer = Files.newBufferedWriter(channelFile.toPath());
@@ -89,7 +93,10 @@ public class CEWBot {
                 writer.close();
             }
 
-            channels = GSON.fromJson(new BufferedReader(new FileReader(channelFile)), type);
+            reader=Files.newBufferedReader(channelFile.toPath());
+            channels = GSON.fromJson(reader, type);
+            reader.close();
+
         } catch (JsonSyntaxException | JsonIOException | IOException e) {
             throw new ConfigException("Channel load error", e);
         }
