@@ -1,21 +1,22 @@
 package ru.ruslan;
 
-import sx.blah.discord.handle.impl.obj.Channel;
-
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Config {
+public class Config  {
 
 	public String token="";
 	public int Delay;
-	public  transient List<Channel> channels;
+	public  List<Channel> channels;
+
 
 	public static Config getDefault() {
 		final Config c = new Config();
 		c.token = "";
 		c.Delay = 1;
-		c.channels = new ArrayList<>();
+		c.channels = Arrays.asList();
 		return c;
 	}
 
