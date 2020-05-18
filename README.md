@@ -3,4 +3,4 @@
 Branches:
         
         D4J - Assync approach
-        JDA - Sync   approach       
+        JDA - Imperative approach       
