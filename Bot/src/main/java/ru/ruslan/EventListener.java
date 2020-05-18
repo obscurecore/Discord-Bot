@@ -55,33 +55,30 @@ public class EventListener {
         register {
             @Override
             public void onCommand(final MessageReceivedEvent e, final String[] args) {
-                final long serverid = e.getChannel().getGuild().getLongID();
+                final long serverid = e.getGuild().getLongID();
                 final long channelid = e.getChannel().getLongID();
                 Collection<Channel> channels = CEWBot.channels.get(serverid);
-                Channel channel = null;
-                if (channels != null) {
-                    for (final Iterator<Channel> it = channels.iterator(); it.hasNext(); ) {
-                        final Channel c = it.next();
-                        if (c.getId() == channelid)
-                            channel = c;
-                    }
-                } else
+                Channel channel = BotUtils.getChannel(serverid, channelid);
+                if (channels==null)
                     channels = new ArrayList<>();
-                if (channel == null)
+                if (channel==null)
                     channel = new Channel(channelid);
-                if (args.length <= 0)
+
+                if (args.length<=0)
                     channel.cewAlert = true;
-                else if (args.length % 2 != 0)
+                // validate number
+                else if (args.length%2!=0)
                     BotUtils.reply(e, "The argument is missing");
+                // change settings in channel
                 else {
                     final Field[] fields = Channel.class.getFields();
-                    for (int i = 0; i < args.length; i += 2) {
+                    for (int i = 0; i<args.length; i += 2) {
                         for (final Field line : fields) {
                             if (line.getName().equals(args[i]))
                                 try {
-                                    line.setBoolean(channel, BooleanUtils.toBoolean(args[i + 1]));
-                                } catch (IllegalArgumentException | IllegalAccessException ex) {
-                                    BotUtils.reply(e, "I've got an error.");
+                                    line.setBoolean(channel, BooleanUtils.toBoolean(args[i+1]));
+                                } catch (IllegalArgumentException|IllegalAccessException ex) {
+                                    BotUtils.reply(e, "Got an error.");
                                     CEWBot.LOGGER.error("Reflection error", ex);
                                 }
                         }
@@ -113,6 +110,18 @@ public class EventListener {
                     }
                 } else
                     BotUtils.reply(e, "This channel has no settings");
+            }
+        },
+        reload {
+            @Override
+            public void onCommand(final MessageReceivedEvent e, final String[] args) {
+                try {
+                    CEWBot.loadConfigs();
+                    BotUtils.reply(e, "Done");
+                } catch (final ConfigException ex) {
+                    BotUtils.reply(e, "Error occurred");
+                    CEWBot.LOGGER.error("Load error", ex);
+                }
             }
         };
 

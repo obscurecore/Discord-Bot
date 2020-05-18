@@ -26,13 +26,14 @@ public class CEWBot {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final File JARPATH = new File(".").getAbsoluteFile();
     public static Config config;
+    //TODO: refactor to Map in map
     public static Map<Long, Collection<Channel>> channels;
     public static IDiscordClient client;
 
     public static void main(final String[] args) throws ConfigException {
 
         loadConfigs();
-        client = createClient(config.token, true);
+       // client = createClient(config.token, true);
 
         /**
          * The EventDispatcher stores a registry of listeners which are used on every event being dispatched.
@@ -40,7 +41,7 @@ public class CEWBot {
          * either on user provided threadpools, or a default threadpool.
          */
 
-        final EventDispatcher dispatcher = client.getDispatcher();
+   //     final EventDispatcher dispatcher = client.getDispatcher();
 
         /**
          * When registering a listener, the client has the option of specifying the thread pool
@@ -48,7 +49,7 @@ public class CEWBot {
          * isolated in terms of threads, avoiding possible thread starvation.
          */
 
-        dispatcher.registerListener(new EventListener());
+       // dispatcher.registerListener(new EventListener());
         LOGGER.info("Running CEWBot");
     }
 
